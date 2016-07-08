@@ -3,16 +3,23 @@ using System.Collections;
 
 public class Brick : MonoBehaviour
 {
-
-    public int maxHits;
     private int timesHit;
+    public static int breakableCount = 0;
     public Sprite[] hitSprites;
     private LevelManager levelManager;
+    public AudioClip crack;
+
+    private bool isBreakable;
     // Use this for initialization
     void Start()
     {
+    
+        isBreakable = (this.tag == "Breakable");
         levelManager = GameObject.FindObjectOfType<LevelManager>();
-        timesHit = 0;
+        if (isBreakable)
+        {
+            breakableCount++;
+        }
     }
 
     // Update is called once per frame
@@ -23,26 +30,38 @@ public class Brick : MonoBehaviour
 
     void OnCollisionEnter2D(Collision2D collision)
     {
-      
-        timesHit++;
-        if (timesHit >= maxHits){
-            Destroy(gameObject);
-        }
-        else {
-            LoadSprites();
-        }
-        Brick[] bricks = GameObject.FindObjectsOfType<Brick>();
-        foreach (var brick in bricks)
+        print(crack);
+        AudioSource.PlayClipAtPoint(crack, transform.position);
+        
+        if (isBreakable)
         {
-            print(brick);
-        }
-        if(bricks.Length == 0){
-            levelManager.LoadNextLevel();
+            HandleHits();
         }
     }
+
+    void HandleHits ()
+    {
+        timesHit++;
+        if (timesHit >= hitSprites.Length + 1)
+        {
+            breakableCount--;
+            levelManager.BrickDestroyed();
+            Destroy(gameObject); 
+        }
+        else
+        {
+            LoadSprites();
+        }
+    }
+
     void LoadSprites()
     {
         int spriteIndex = timesHit - 1;
-        this.GetComponent<SpriteRenderer>().sprite = hitSprites[spriteIndex];
+        // If a sprite is missing make sure that the collider disappears
+        if (hitSprites[spriteIndex])
+        {
+            this.GetComponent<SpriteRenderer>().sprite = hitSprites[spriteIndex];
+        }
+        
     }
 }
