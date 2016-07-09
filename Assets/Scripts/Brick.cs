@@ -13,7 +13,6 @@ public class Brick : MonoBehaviour
     // Use this for initialization
     void Start()
     {
-    
         isBreakable = (this.tag == "Breakable");
         levelManager = GameObject.FindObjectOfType<LevelManager>();
         if (isBreakable)
@@ -28,10 +27,9 @@ public class Brick : MonoBehaviour
 
     }
 
-    void OnCollisionEnter2D(Collision2D collision)
+    void OnCollisionEnter2D(Collision2D collider)
     {
-        print(crack);
-        AudioSource.PlayClipAtPoint(crack, transform.position);
+        //AudioSource.PlayClipAtPoint(crack, transform.position);
         
         if (isBreakable)
         {

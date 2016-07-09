@@ -16,14 +16,21 @@ public class LevelManager : MonoBehaviour {
 
     public void LoadNextLevel()
     {
-        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
+		SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
     }
+
+	public void ReloadLevel(){
+		SceneManager.LoadScene (SceneManager.GetActiveScene().buildIndex);
+	}
 
     public void BrickDestroyed()
     {
+		//currentLevelIndex = SceneManager.GetActiveScene ().buildIndex;
         if(Brick.breakableCount <= 0)
         {
-            LoadNextLevel();
+			//LoadLevel ("Load");
+			LoadNextLevel ();
         }
+		
     }
 }
