@@ -3,16 +3,31 @@ using System.Collections;
 
 public class Brick : MonoBehaviour
 {
-    private int timesHit;
+	/**
+	 * Game control
+	*/
+	private bool isBreakable;
+    private int timesHit = 0;
     public static int breakableCount = 0;
+	private bool containsPowerUp = false;
+
+	/**
+	 * Game Objects and Components
+	*/
+	public GameObject smoke;
     public Sprite[] hitSprites;
+	public GameObject[] powerUp;
     private LevelManager levelManager;
     public AudioClip crack;
 
-    private bool isBreakable;
+    
     // Use this for initialization
     void Start()
     {
+		if (breakableCount % 10 == 0) {
+			containsPowerUp = true;
+		}
+	
         isBreakable = (this.tag == "Breakable");
         levelManager = GameObject.FindObjectOfType<LevelManager>();
         if (isBreakable)
@@ -21,22 +36,22 @@ public class Brick : MonoBehaviour
         }
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-
-    }
-
+	/**
+	 * Tiggers on Collision
+	 */
     void OnCollisionEnter2D(Collision2D collider)
     {
-        //AudioSource.PlayClipAtPoint(crack, transform.position);
-        
+        //AudioSource.PlayClipAtPoint(crack, transform.position)
         if (isBreakable)
         {
             HandleHits();
         }
     }
 
+	/*
+	 * Logic For when a Brick is hit
+	 * The hitSprites array determines how many hits the block can take
+	 */
     void HandleHits ()
     {
         timesHit++;
@@ -44,6 +59,10 @@ public class Brick : MonoBehaviour
         {
             breakableCount--;
             levelManager.BrickDestroyed();
+			AddSmoke ();
+			if (containsPowerUp) {
+				Instantiate (powerUp[Random.Range (0, 2)], gameObject.transform.position, Quaternion.identity);
+			}
             Destroy(gameObject); 
         }
         else
@@ -52,6 +71,22 @@ public class Brick : MonoBehaviour
         }
     }
 
+	/*
+	 * Use Particle System to create smoke when a brick is destroyed
+	 * the smode is centered at the brick and has the same color
+	 */
+	void AddSmoke(){
+		Vector3 smokepos = new Vector3 (gameObject.transform.position.x + 0.5f, gameObject.transform.position.y + 0.327f, 0f);
+		GameObject brickSmoke = Instantiate (smoke, smokepos, Quaternion.identity) as GameObject;
+		brickSmoke.GetComponent<ParticleSystem> ().startColor = gameObject.GetComponent<SpriteRenderer> ().color;
+	}
+
+	/*
+	 * When a Brick is hit set the next sprite in the sprite array
+	 * making them look damaged.
+	 * 
+	 * If a sprite somehow disappears then show an error for this
+	 */
     void LoadSprites()
     {
         int spriteIndex = timesHit - 1;
@@ -59,7 +94,9 @@ public class Brick : MonoBehaviour
         if (hitSprites[spriteIndex])
         {
             this.GetComponent<SpriteRenderer>().sprite = hitSprites[spriteIndex];
-        }
+		} else {
+			Debug.LogError ("Sprite Missing");
+		}
         
     }
 }
